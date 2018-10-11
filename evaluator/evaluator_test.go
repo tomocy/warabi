@@ -82,6 +82,23 @@ func TestEvaluate(t *testing.T) {
 			},
 		},
 		{
+			`var a, b, c, d = "a" < "a", "a" < "b", "a" <= "a", "a" >= "z"`,
+			[]object.Object{
+				&object.BooleanLiteral{
+					Value: false,
+				},
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: false,
+				},
+			},
+		},
+		{
 			`var a = 'a'`,
 			[]object.Object{
 				&object.CharacterLiteral{

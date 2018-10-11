@@ -188,11 +188,48 @@ func evaluateBinaryExpressionOfStringLiteral(
 	operator token.Token,
 	rightObj *object.StringLiteral,
 ) object.Object {
+	switch operator {
+	case token.ADD:
+		return evaluateArithmeticOperationOfStringLiteral(leftObj, operator, rightObj)
+	case token.LSS, token.GTR, token.LEQ, token.GEQ:
+		return evaluateRelationalOperationOfStringLiteral(leftObj, operator, rightObj)
+	default:
+		return nil
+	}
+}
+
+func evaluateArithmeticOperationOfStringLiteral(
+	leftObj *object.StringLiteral,
+	operator token.Token,
+	rightObj *object.StringLiteral,
+) object.Object {
 	if operator != token.ADD {
 		return nil
 	}
 	leftObj.Value += rightObj.Value
 	return leftObj
+}
+
+func evaluateRelationalOperationOfStringLiteral(
+	leftObj *object.StringLiteral,
+	operator token.Token,
+	rightObj *object.StringLiteral,
+) object.Object {
+	var value bool
+	switch operator {
+	case token.LSS:
+		value = leftObj.Value < rightObj.Value
+	case token.GTR:
+		value = leftObj.Value > rightObj.Value
+	case token.LEQ:
+		value = leftObj.Value <= rightObj.Value
+	case token.GEQ:
+		value = leftObj.Value >= rightObj.Value
+	default:
+		return nil
+	}
+
+	return convertToBooleanLiteral(value)
 }
 
 func evaluateBinaryExpressionOfCharacterLiteral(
