@@ -303,6 +303,8 @@ func evaluateBinaryExpressionOfFloatingPointLiteral(
 	switch operator {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		return evaluateArithmeticOperationOfFloatingPointLiteral(leftObj, operator, rightObj)
+	case token.LSS, token.GTR, token.LEQ, token.GEQ:
+		return evaluateRelationalOperationOfFloatingPointLiteral(leftObj, operator, rightObj)
 	default:
 		return nil
 	}
@@ -330,6 +332,28 @@ func evaluateArithmeticOperationOfFloatingPointLiteral(
 	}
 
 	return leftObj
+}
+
+func evaluateRelationalOperationOfFloatingPointLiteral(
+	leftObj *object.FloatingPointLiteral,
+	operator token.Token,
+	rightObj *object.FloatingPointLiteral,
+) object.Object {
+	var value bool
+	switch operator {
+	case token.LSS:
+		value = leftObj.Value < rightObj.Value
+	case token.GTR:
+		value = leftObj.Value > rightObj.Value
+	case token.LEQ:
+		value = leftObj.Value <= rightObj.Value
+	case token.GEQ:
+		value = leftObj.Value >= rightObj.Value
+	default:
+		return nil
+	}
+
+	return convertToBooleanLiteral(value)
 }
 
 func evaluateUnaryExpression(expr *ast.UnaryExpr) object.Object {
