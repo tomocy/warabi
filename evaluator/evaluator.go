@@ -170,6 +170,8 @@ func evaluateBasicLiteral(expr *ast.BasicLit) []object.Object {
 	switch expr.Kind {
 	case token.INT:
 		return evaluateIntegerLiteral(expr)
+	case token.STRING:
+		return evaluateStringLiteral(expr)
 	default:
 		return nil
 	}
@@ -184,6 +186,14 @@ func evaluateIntegerLiteral(expr *ast.BasicLit) []object.Object {
 	return []object.Object{
 		&object.IntegerLiteral{
 			Value: value,
+		},
+	}
+}
+
+func evaluateStringLiteral(expr *ast.BasicLit) []object.Object {
+	return []object.Object{
+		&object.StringLiteral{
+			Value: expr.Value,
 		},
 	}
 }

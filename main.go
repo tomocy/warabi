@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	// repler := repl.NewStandard(os.Stdin, os.Stdout)
-	repler := repl.NewWarabi(os.Stdin, os.Stdout)
+	repler := repl.NewStandard(os.Stdin, os.Stdout)
+	// repler := repl.NewWarabi(os.Stdin, os.Stdout)
 	repler.REPL()
 }

@@ -53,6 +53,14 @@ func TestEvaluate(t *testing.T) {
 				},
 			},
 		},
+		{
+			`var a = "go"`,
+			[]object.Object{
+				&object.StringLiteral{
+					Value: `"go"`,
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

@@ -7,6 +7,7 @@ type Kind int
 const (
 	Unknown Kind = iota
 	Integer
+	String
 )
 
 type Object interface {
@@ -24,4 +25,16 @@ func (l IntegerLiteral) Kind() Kind {
 
 func (l IntegerLiteral) String() string {
 	return fmt.Sprintf("%d", l.Value)
+}
+
+type StringLiteral struct {
+	Value string
+}
+
+func (l StringLiteral) Kind() Kind {
+	return String
+}
+
+func (l StringLiteral) String() string {
+	return l.Value
 }
