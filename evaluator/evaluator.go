@@ -169,8 +169,8 @@ func evaluateBinaryExpressionOfCharacterLiteral(leftObj *object.CharacterLiteral
 }
 
 func evaluateArithmeticOperationOfCharacterLiteral(leftObj *object.CharacterLiteral, operator token.Token, rightObj *object.CharacterLiteral) []object.Object {
-	leftChar := []rune(strings.TrimLeft(strings.TrimRight(leftObj.Value, "'"), "'"))[0]
-	rightChar := []rune(strings.TrimLeft(strings.TrimRight(rightObj.Value, "'"), "'"))[0]
+	leftChar := []rune(strings.Trim(leftObj.Value, "'"))[0]
+	rightChar := []rune(strings.Trim(rightObj.Value, "'"))[0]
 	switch operator {
 	case token.ADD:
 		leftObj.Value = string(leftChar + rightChar)
