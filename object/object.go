@@ -10,6 +10,7 @@ const (
 	String
 	Character
 	FloatingPoint
+	Boolean
 )
 
 type Object interface {
@@ -63,4 +64,16 @@ func (l FloatingPointLiteral) Kind() Kind {
 
 func (l FloatingPointLiteral) String() string {
 	return fmt.Sprintf("%e", l.Value)
+}
+
+type BooleanLiteral struct {
+	Value bool
+}
+
+func (l BooleanLiteral) Kind() Kind {
+	return Boolean
+}
+
+func (l BooleanLiteral) String() string {
+	return fmt.Sprintf("%t", l.Value)
 }

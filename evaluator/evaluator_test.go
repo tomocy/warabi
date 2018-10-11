@@ -108,6 +108,17 @@ func TestEvaluate(t *testing.T) {
 				},
 			},
 		},
+		{
+			`var a, b = true, false`,
+			[]object.Object{
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: false,
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

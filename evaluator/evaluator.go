@@ -25,13 +25,13 @@ func Evaluate(src string) []object.Object {
 func evaluateDeclarations(decls []ast.Decl) []object.Object {
 	var objs []object.Object
 	for _, decl := range decls {
-		objs = append(objs, evaluateDeclaration(decl)...)
+		objs = append(objs, evaluateDeclaration(decl, env)...)
 	}
 
 	return objs
 }
 
-func evaluateDeclaration(decl ast.Decl) []object.Object {
+func evaluateDeclaration(decl ast.Decl, env *environment) []object.Object {
 	switch decl := decl.(type) {
 	case *ast.GenDecl:
 		return evaluateGenericsDeclaration(decl)
@@ -61,13 +61,15 @@ func evaluateSpecification(spec ast.Spec) []object.Object {
 func evaluateValueSpecification(spec *ast.ValueSpec) []object.Object {
 	var objs []object.Object
 	for i := 0; i < len(spec.Names); i++ {
-		objs = append(objs, evaluateExpression(spec.Values[i])...)
+		obj := evaluateExpression(spec.Values[i])
+		env.set(spec.Names[i].Name, obj)
+		objs = append(objs, obj)
 	}
 
 	return objs
 }
 
-func evaluateExpression(expr ast.Expr) []object.Object {
+func evaluateExpression(expr ast.Expr) object.Object {
 	switch expr := expr.(type) {
 	case *ast.ParenExpr:
 		return evaluateParenExpression(expr)
@@ -75,6 +77,8 @@ func evaluateExpression(expr ast.Expr) []object.Object {
 		return evaluateBinaryExpression(expr)
 	case *ast.UnaryExpr:
 		return evaluateUnaryExpression(expr)
+	case *ast.Ident:
+		return evaluateIdentifier(expr)
 	case *ast.BasicLit:
 		return evaluateBasicLiteral(expr)
 	default:
@@ -82,23 +86,13 @@ func evaluateExpression(expr ast.Expr) []object.Object {
 	}
 }
 
-func evaluateParenExpression(expr *ast.ParenExpr) []object.Object {
+func evaluateParenExpression(expr *ast.ParenExpr) object.Object {
 	return evaluateExpression(expr.X)
 }
 
-func evaluateBinaryExpression(expr *ast.BinaryExpr) []object.Object {
-	leftObjs := evaluateExpression(expr.X)
-	if len(leftObjs) != 1 {
-		return nil
-	}
-	leftObj := leftObjs[0]
-
-	rightObjs := evaluateExpression(expr.Y)
-	if len(rightObjs) != 1 {
-		return nil
-	}
-	rightObj := rightObjs[0]
-
+func evaluateBinaryExpression(expr *ast.BinaryExpr) object.Object {
+	leftObj := evaluateExpression(expr.X)
+	rightObj := evaluateExpression(expr.Y)
 	switch {
 	case leftObj.Kind() == object.Integer && rightObj.Kind() == object.Integer:
 		return evaluateBinaryExpressionOfIntegerLiteral(leftObj.(*object.IntegerLiteral), expr.Op, rightObj.(*object.IntegerLiteral))
@@ -125,7 +119,11 @@ func evaluateBinaryExpression(expr *ast.BinaryExpr) []object.Object {
 	}
 }
 
-func evaluateBinaryExpressionOfIntegerLiteral(leftObj *object.IntegerLiteral, operator token.Token, rightObj *object.IntegerLiteral) []object.Object {
+func evaluateBinaryExpressionOfIntegerLiteral(
+	leftObj *object.IntegerLiteral,
+	operator token.Token,
+	rightObj *object.IntegerLiteral,
+) object.Object {
 	switch operator {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		return evaluateArithmeticOperation(leftObj, operator, rightObj)
@@ -134,7 +132,11 @@ func evaluateBinaryExpressionOfIntegerLiteral(leftObj *object.IntegerLiteral, op
 	}
 }
 
-func evaluateArithmeticOperation(leftObj *object.IntegerLiteral, operator token.Token, rightObj *object.IntegerLiteral) []object.Object {
+func evaluateArithmeticOperation(
+	leftObj *object.IntegerLiteral,
+	operator token.Token,
+	rightObj *object.IntegerLiteral,
+) object.Object {
 	switch operator {
 	case token.ADD:
 		leftObj.Value += rightObj.Value
@@ -153,22 +155,26 @@ func evaluateArithmeticOperation(leftObj *object.IntegerLiteral, operator token.
 		return nil
 	}
 
-	return []object.Object{
-		leftObj,
-	}
+	return leftObj
 }
 
-func evaluateBinaryExpressionOfStringLiteral(leftObj *object.StringLiteral, operator token.Token, rightObj *object.StringLiteral) []object.Object {
+func evaluateBinaryExpressionOfStringLiteral(
+	leftObj *object.StringLiteral,
+	operator token.Token,
+	rightObj *object.StringLiteral,
+) object.Object {
 	if operator != token.ADD {
 		return nil
 	}
 	leftObj.Value += rightObj.Value
-	return []object.Object{
-		leftObj,
-	}
+	return leftObj
 }
 
-func evaluateBinaryExpressionOfCharacterLiteral(leftObj *object.CharacterLiteral, operator token.Token, rightObj *object.CharacterLiteral) []object.Object {
+func evaluateBinaryExpressionOfCharacterLiteral(
+	leftObj *object.CharacterLiteral,
+	operator token.Token,
+	rightObj *object.CharacterLiteral,
+) object.Object {
 	switch operator {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		return evaluateArithmeticOperationOfCharacterLiteral(leftObj, operator, rightObj)
@@ -177,7 +183,11 @@ func evaluateBinaryExpressionOfCharacterLiteral(leftObj *object.CharacterLiteral
 	}
 }
 
-func evaluateArithmeticOperationOfCharacterLiteral(leftObj *object.CharacterLiteral, operator token.Token, rightObj *object.CharacterLiteral) []object.Object {
+func evaluateArithmeticOperationOfCharacterLiteral(
+	leftObj *object.CharacterLiteral,
+	operator token.Token,
+	rightObj *object.CharacterLiteral,
+) object.Object {
 	switch operator {
 	case token.ADD:
 		leftObj.Value += rightObj.Value
@@ -196,12 +206,14 @@ func evaluateArithmeticOperationOfCharacterLiteral(leftObj *object.CharacterLite
 		return nil
 	}
 
-	return []object.Object{
-		leftObj,
-	}
+	return leftObj
 }
 
-func evaluateBinaryExpressionOfFloatingPointLiteral(leftObj *object.FloatingPointLiteral, operator token.Token, rightObj *object.FloatingPointLiteral) []object.Object {
+func evaluateBinaryExpressionOfFloatingPointLiteral(
+	leftObj *object.FloatingPointLiteral,
+	operator token.Token,
+	rightObj *object.FloatingPointLiteral,
+) object.Object {
 	switch operator {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		return evaluateArithmeticOperationOfFloatingPointLiteral(leftObj, operator, rightObj)
@@ -210,7 +222,11 @@ func evaluateBinaryExpressionOfFloatingPointLiteral(leftObj *object.FloatingPoin
 	}
 }
 
-func evaluateArithmeticOperationOfFloatingPointLiteral(leftObj *object.FloatingPointLiteral, operator token.Token, rightObj *object.FloatingPointLiteral) []object.Object {
+func evaluateArithmeticOperationOfFloatingPointLiteral(
+	leftObj *object.FloatingPointLiteral,
+	operator token.Token,
+	rightObj *object.FloatingPointLiteral,
+) object.Object {
 	switch operator {
 	case token.ADD:
 		leftObj.Value += rightObj.Value
@@ -227,12 +243,10 @@ func evaluateArithmeticOperationOfFloatingPointLiteral(leftObj *object.FloatingP
 		return nil
 	}
 
-	return []object.Object{
-		leftObj,
-	}
+	return leftObj
 }
 
-func evaluateUnaryExpression(expr *ast.UnaryExpr) []object.Object {
+func evaluateUnaryExpression(expr *ast.UnaryExpr) object.Object {
 	switch expr.Op {
 	case token.SUB:
 		return evaluateMinusOperation(expr)
@@ -241,24 +255,27 @@ func evaluateUnaryExpression(expr *ast.UnaryExpr) []object.Object {
 	}
 }
 
-func evaluateMinusOperation(expr *ast.UnaryExpr) []object.Object {
-	objs := evaluateExpression(expr.X)
-	if len(objs) != 1 {
-		return nil
-	}
-
-	obj, ok := objs[0].(*object.IntegerLiteral)
+func evaluateMinusOperation(expr *ast.UnaryExpr) object.Object {
+	obj := evaluateExpression(expr.X)
+	intObj, ok := obj.(*object.IntegerLiteral)
 	if !ok {
 		return nil
 	}
 
-	obj.Value *= -1
-	return []object.Object{
-		obj,
-	}
+	intObj.Value *= -1
+	return intObj
 }
 
-func evaluateBasicLiteral(expr *ast.BasicLit) []object.Object {
+func evaluateIdentifier(expr *ast.Ident) object.Object {
+	obj, ok := env.get(expr.Name)
+	if !ok {
+		return nil
+	}
+
+	return obj
+}
+
+func evaluateBasicLiteral(expr *ast.BasicLit) object.Object {
 	switch expr.Kind {
 	case token.INT:
 		return evaluateIntegerLiteral(expr)
@@ -273,42 +290,34 @@ func evaluateBasicLiteral(expr *ast.BasicLit) []object.Object {
 	}
 }
 
-func evaluateIntegerLiteral(expr *ast.BasicLit) []object.Object {
+func evaluateIntegerLiteral(expr *ast.BasicLit) object.Object {
 	value, err := strconv.Atoi(expr.Value)
 	if err != nil {
 		return nil
 	}
-	return []object.Object{
-		&object.IntegerLiteral{
-			Value: value,
-		},
+	return &object.IntegerLiteral{
+		Value: value,
 	}
 }
 
-func evaluateStringLiteral(expr *ast.BasicLit) []object.Object {
-	return []object.Object{
-		&object.StringLiteral{
-			Value: expr.Value[1 : len(expr.Value)-1],
-		},
+func evaluateStringLiteral(expr *ast.BasicLit) object.Object {
+	return &object.StringLiteral{
+		Value: expr.Value[1 : len(expr.Value)-1],
 	}
 }
 
-func evaluateCharacterLiteral(expr *ast.BasicLit) []object.Object {
-	return []object.Object{
-		&object.CharacterLiteral{
-			Value: []rune(expr.Value[1 : len(expr.Value)-1])[0],
-		},
+func evaluateCharacterLiteral(expr *ast.BasicLit) object.Object {
+	return &object.CharacterLiteral{
+		Value: []rune(expr.Value[1 : len(expr.Value)-1])[0],
 	}
 }
 
-func evaluateFloatingPointLiteral(expr *ast.BasicLit) []object.Object {
+func evaluateFloatingPointLiteral(expr *ast.BasicLit) object.Object {
 	value, err := strconv.ParseFloat(expr.Value, 32)
 	if err != nil {
 		return nil
 	}
-	return []object.Object{
-		&object.FloatingPointLiteral{
-			Value: float32(value),
-		},
+	return &object.FloatingPointLiteral{
+		Value: float32(value),
 	}
 }
