@@ -21,7 +21,7 @@ func TestEvaluate(t *testing.T) {
 			},
 		},
 		{
-			"var a, b = 10 + 5, 5 - 10",
+			"var a, b, c, d, e = 10 + 5, 5 - 10, 5 * -5, 5 / 5, 10 % 5",
 			[]object.Object{
 				&object.IntegerLiteral{
 					Value: 15,
@@ -29,11 +29,6 @@ func TestEvaluate(t *testing.T) {
 				&object.IntegerLiteral{
 					Value: -5,
 				},
-			},
-		},
-		{
-			"var a, b, c = 5 * -5, 5 / 5, 10 % 5",
-			[]object.Object{
 				&object.IntegerLiteral{
 					Value: -25,
 				},
@@ -50,6 +45,23 @@ func TestEvaluate(t *testing.T) {
 			[]object.Object{
 				&object.IntegerLiteral{
 					Value: 20,
+				},
+			},
+		},
+		{
+			"var a, b, c, d = 5 < 10, 1 > 1, 0 <= 0, 98 >= 99",
+			[]object.Object{
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: false,
+				},
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: false,
 				},
 			},
 		},
@@ -98,13 +110,19 @@ func TestEvaluate(t *testing.T) {
 			},
 		},
 		{
-			`var a, b = 5.0 / 2, 4 * 2.0`,
+			`var a, b, c, d = 5.5 + 2, 4 - 2.0, 6 * 0.0, 3 / 2.0`,
 			[]object.Object{
 				&object.FloatingPointLiteral{
-					Value: 2.5,
+					Value: 7.5,
 				},
 				&object.FloatingPointLiteral{
-					Value: 8.0,
+					Value: 2.0,
+				},
+				&object.FloatingPointLiteral{
+					Value: 0.0,
+				},
+				&object.FloatingPointLiteral{
+					Value: 1.5,
 				},
 			},
 		},

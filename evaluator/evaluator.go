@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -127,6 +128,8 @@ func evaluateBinaryExpressionOfIntegerLiteral(
 	switch operator {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		return evaluateArithmeticOperation(leftObj, operator, rightObj)
+	case token.LSS, token.GTR, token.LEQ, token.GEQ:
+		return evaluateRelationalOperationOfIntegerLiteral(leftObj, operator, rightObj)
 	default:
 		return nil
 	}
@@ -156,6 +159,28 @@ func evaluateArithmeticOperation(
 	}
 
 	return leftObj
+}
+
+func evaluateRelationalOperationOfIntegerLiteral(
+	leftObj *object.IntegerLiteral,
+	operator token.Token,
+	rightObj *object.IntegerLiteral,
+) object.Object {
+	var value bool
+	switch operator {
+	case token.LSS:
+		value = leftObj.Value < rightObj.Value
+	case token.GTR:
+		value = leftObj.Value > rightObj.Value
+	case token.LEQ:
+		value = leftObj.Value <= rightObj.Value
+	case token.GEQ:
+		value = leftObj.Value >= rightObj.Value
+	default:
+		return nil
+	}
+
+	return convertToBooleanLiteral(value)
 }
 
 func evaluateBinaryExpressionOfStringLiteral(
@@ -320,4 +345,9 @@ func evaluateFloatingPointLiteral(expr *ast.BasicLit) object.Object {
 	return &object.FloatingPointLiteral{
 		Value: float32(value),
 	}
+}
+
+func convertToBooleanLiteral(b bool) object.Object {
+	obj, _ := env.get(fmt.Sprintf("%t", b))
+	return obj
 }
