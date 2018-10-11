@@ -98,17 +98,30 @@ func TestEvaluate(t *testing.T) {
 				},
 			},
 		},
+		{
+			`var a, b = 5.0 / 2, 4 * 2.0`,
+			[]object.Object{
+				&object.FloatingPointLiteral{
+					Value: 2.5,
+				},
+				&object.FloatingPointLiteral{
+					Value: 8.0,
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {
-		gots := Evaluate(test.source)
-		if len(gots) != len(test.wants) {
-			t.Fatalf("unexpected object length: got %d, expected %d\n", len(gots), len(test.wants))
-		}
-		for i := 0; i < len(test.wants); i++ {
-			if !reflect.DeepEqual(gots[i], test.wants[i]) {
-				t.Errorf("unexpected object: got %#v, expected %#v\n", gots[i], test.wants[i])
+		t.Run(test.source, func(t *testing.T) {
+			gots := Evaluate(test.source)
+			if len(gots) != len(test.wants) {
+				t.Fatalf("unexpected object length: got %d, expected %d\n", len(gots), len(test.wants))
 			}
-		}
+			for i := 0; i < len(test.wants); i++ {
+				if !reflect.DeepEqual(gots[i], test.wants[i]) {
+					t.Errorf("unexpected object: got %#v, expected %#v\n", gots[i], test.wants[i])
+				}
+			}
+		})
 	}
 }

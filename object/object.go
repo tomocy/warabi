@@ -9,6 +9,7 @@ const (
 	Integer
 	String
 	Character
+	FloatingPoint
 )
 
 type Object interface {
@@ -50,4 +51,16 @@ func (l CharacterLiteral) Kind() Kind {
 
 func (l CharacterLiteral) String() string {
 	return l.Value
+}
+
+type FloatingPointLiteral struct {
+	Value float32
+}
+
+func (l FloatingPointLiteral) Kind() Kind {
+	return FloatingPoint
+}
+
+func (l FloatingPointLiteral) String() string {
+	return fmt.Sprintf("%e", l.Value)
 }
