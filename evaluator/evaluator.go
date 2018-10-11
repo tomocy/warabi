@@ -5,7 +5,6 @@ import (
 	"go/parser"
 	"go/token"
 	"strconv"
-	"strings"
 
 	"github.com/tomocy/warabi/object"
 )
@@ -163,11 +162,7 @@ func evaluateBinaryExpressionOfStringLiteral(leftObj *object.StringLiteral, oper
 	if operator != token.ADD {
 		return nil
 	}
-
-	leftStr := strings.TrimRight(leftObj.Value, `"`)
-	rightStr := strings.TrimLeft(rightObj.Value, `"`)
-	leftObj.Value = leftStr + rightStr
-
+	leftObj.Value += rightObj.Value
 	return []object.Object{
 		leftObj,
 	}
@@ -183,22 +178,20 @@ func evaluateBinaryExpressionOfCharacterLiteral(leftObj *object.CharacterLiteral
 }
 
 func evaluateArithmeticOperationOfCharacterLiteral(leftObj *object.CharacterLiteral, operator token.Token, rightObj *object.CharacterLiteral) []object.Object {
-	leftChar := []rune(strings.Trim(leftObj.Value, "'"))[0]
-	rightChar := []rune(strings.Trim(rightObj.Value, "'"))[0]
 	switch operator {
 	case token.ADD:
-		leftObj.Value = string(leftChar + rightChar)
+		leftObj.Value += rightObj.Value
 	case token.SUB:
-		leftObj.Value = string(leftChar - rightChar)
+		leftObj.Value -= rightObj.Value
 	case token.MUL:
-		leftObj.Value = string(leftChar * rightChar)
+		leftObj.Value *= rightObj.Value
 	case token.QUO:
-		if rightChar == 0 {
+		if rightObj.Value == 0 {
 			return nil
 		}
-		leftObj.Value = string(leftChar / rightChar)
+		leftObj.Value /= rightObj.Value
 	case token.REM:
-		leftObj.Value = string(leftChar % rightChar)
+		leftObj.Value %= rightObj.Value
 	default:
 		return nil
 	}
@@ -285,7 +278,6 @@ func evaluateIntegerLiteral(expr *ast.BasicLit) []object.Object {
 	if err != nil {
 		return nil
 	}
-
 	return []object.Object{
 		&object.IntegerLiteral{
 			Value: value,
@@ -296,7 +288,7 @@ func evaluateIntegerLiteral(expr *ast.BasicLit) []object.Object {
 func evaluateStringLiteral(expr *ast.BasicLit) []object.Object {
 	return []object.Object{
 		&object.StringLiteral{
-			Value: expr.Value,
+			Value: expr.Value[1 : len(expr.Value)-1],
 		},
 	}
 }
@@ -304,7 +296,7 @@ func evaluateStringLiteral(expr *ast.BasicLit) []object.Object {
 func evaluateCharacterLiteral(expr *ast.BasicLit) []object.Object {
 	return []object.Object{
 		&object.CharacterLiteral{
-			Value: expr.Value,
+			Value: []rune(expr.Value[1 : len(expr.Value)-1])[0],
 		},
 	}
 }

@@ -42,7 +42,7 @@ func (l StringLiteral) String() string {
 }
 
 type CharacterLiteral struct {
-	Value string
+	Value rune
 }
 
 func (l CharacterLiteral) Kind() Kind {
@@ -50,7 +50,7 @@ func (l CharacterLiteral) Kind() Kind {
 }
 
 func (l CharacterLiteral) String() string {
-	return l.Value
+	return fmt.Sprintf("%d", l.Value)
 }
 
 type FloatingPointLiteral struct {

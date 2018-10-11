@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -58,7 +57,7 @@ func TestEvaluate(t *testing.T) {
 			`var a = "go"`,
 			[]object.Object{
 				&object.StringLiteral{
-					Value: `"go"`,
+					Value: "go",
 				},
 			},
 		},
@@ -66,7 +65,7 @@ func TestEvaluate(t *testing.T) {
 			`var a = "hello, " + "world"`,
 			[]object.Object{
 				&object.StringLiteral{
-					Value: `"hello, world"`,
+					Value: "hello, world",
 				},
 			},
 		},
@@ -74,7 +73,7 @@ func TestEvaluate(t *testing.T) {
 			`var a = 'a'`,
 			[]object.Object{
 				&object.CharacterLiteral{
-					Value: `'a'`,
+					Value: 'a',
 				},
 			},
 		},
@@ -82,19 +81,19 @@ func TestEvaluate(t *testing.T) {
 			`var a, b, c, d, e = 'a' + 'a', 'b' - 'b', 'c' * 'c', 'd' / 'd', 'e' % 'e'`,
 			[]object.Object{
 				&object.CharacterLiteral{
-					Value: fmt.Sprint(string('a' + 'a')),
+					Value: 'a' + 'a',
 				},
 				&object.CharacterLiteral{
-					Value: fmt.Sprint(string('b' - 'b')),
+					Value: 'b' - 'b',
 				},
 				&object.CharacterLiteral{
-					Value: fmt.Sprint(string('c' * 'c')),
+					Value: 'c' * 'c',
 				},
 				&object.CharacterLiteral{
-					Value: fmt.Sprint(string('d' / 'd')),
+					Value: 'd' / 'd',
 				},
 				&object.CharacterLiteral{
-					Value: fmt.Sprint(string('e' % 'e')),
+					Value: 'e' % 'e',
 				},
 			},
 		},
