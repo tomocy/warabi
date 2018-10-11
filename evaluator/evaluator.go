@@ -26,13 +26,13 @@ func Evaluate(src string) []object.Object {
 func evaluateDeclarations(decls []ast.Decl) []object.Object {
 	var objs []object.Object
 	for _, decl := range decls {
-		objs = append(objs, evaluateDeclaration(decl, env)...)
+		objs = append(objs, evaluateDeclaration(decl)...)
 	}
 
 	return objs
 }
 
-func evaluateDeclaration(decl ast.Decl, env *environment) []object.Object {
+func evaluateDeclaration(decl ast.Decl) []object.Object {
 	switch decl := decl.(type) {
 	case *ast.GenDecl:
 		return evaluateGenericsDeclaration(decl)
@@ -66,7 +66,7 @@ func evaluateValueSpecification(spec *ast.ValueSpec) []object.Object {
 	}
 	for i := 0; i < len(spec.Names); i++ {
 		obj := evaluateExpression(spec.Values[i])
-		env.set(spec.Names[i].Name, obj)
+		object.Env.Set(spec.Names[i].Name, obj)
 		objs = append(objs, obj)
 	}
 
@@ -341,7 +341,7 @@ func evaluateNotOperation(expr *ast.UnaryExpr) object.Object {
 }
 
 func evaluateIdentifier(expr *ast.Ident) object.Object {
-	obj, ok := env.get(expr.Name)
+	obj, ok := object.Env.Get(expr.Name)
 	if !ok {
 		return nil
 	}
@@ -397,6 +397,6 @@ func evaluateFloatingPointLiteral(expr *ast.BasicLit) object.Object {
 }
 
 func convertToBooleanLiteral(b bool) object.Object {
-	obj, _ := env.get(fmt.Sprintf("%t", b))
+	obj, _ := object.Env.Get(fmt.Sprintf("%t", b))
 	return obj
 }

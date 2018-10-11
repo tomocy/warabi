@@ -1,6 +1,8 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Kind int
 
@@ -11,6 +13,7 @@ const (
 	Character
 	FloatingPoint
 	Boolean
+	Function
 )
 
 type Object interface {
