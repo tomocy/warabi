@@ -105,6 +105,8 @@ func evaluateBinaryExpression(expr *ast.BinaryExpr) []object.Object {
 		return evaluateBinaryExpressionOfIntegerLiteral(leftObj.(*object.IntegerLiteral), expr.Op, rightObj.(*object.IntegerLiteral))
 	case leftObj.Kind() == object.String && rightObj.Kind() == object.String:
 		return evaluateBinaryExpressionOfStringLiteral(leftObj.(*object.StringLiteral), expr.Op, rightObj.(*object.StringLiteral))
+	case leftObj.Kind() == object.Character && rightObj.Kind() == object.Character:
+		return evaluateBinaryExpressionOfCharacterLiteral(leftObj.(*object.CharacterLiteral), expr.Op, rightObj.(*object.CharacterLiteral))
 	default:
 		return nil
 	}
@@ -128,11 +130,11 @@ func evaluateArithmeticOperation(leftObj *object.IntegerLiteral, operator token.
 	case token.MUL:
 		leftObj.Value *= rightObj.Value
 	case token.QUO:
-		leftObj.Value /= rightObj.Value
-	case token.REM:
 		if rightObj.Value == 0 {
 			return nil
 		}
+		leftObj.Value /= rightObj.Value
+	case token.REM:
 		leftObj.Value %= rightObj.Value
 	default:
 		return nil
@@ -151,6 +153,41 @@ func evaluateBinaryExpressionOfStringLiteral(leftObj *object.StringLiteral, oper
 	leftStr := strings.TrimRight(leftObj.Value, `"`)
 	rightStr := strings.TrimLeft(rightObj.Value, `"`)
 	leftObj.Value = leftStr + rightStr
+
+	return []object.Object{
+		leftObj,
+	}
+}
+
+func evaluateBinaryExpressionOfCharacterLiteral(leftObj *object.CharacterLiteral, operator token.Token, rightObj *object.CharacterLiteral) []object.Object {
+	switch operator {
+	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
+		return evaluateArithmeticOperationOfCharacterLiteral(leftObj, operator, rightObj)
+	default:
+		return nil
+	}
+}
+
+func evaluateArithmeticOperationOfCharacterLiteral(leftObj *object.CharacterLiteral, operator token.Token, rightObj *object.CharacterLiteral) []object.Object {
+	leftChar := []rune(strings.TrimLeft(strings.TrimRight(leftObj.Value, "'"), "'"))[0]
+	rightChar := []rune(strings.TrimLeft(strings.TrimRight(rightObj.Value, "'"), "'"))[0]
+	switch operator {
+	case token.ADD:
+		leftObj.Value = string(leftChar + rightChar)
+	case token.SUB:
+		leftObj.Value = string(leftChar - rightChar)
+	case token.MUL:
+		leftObj.Value = string(leftChar * rightChar)
+	case token.QUO:
+		if rightChar == 0 {
+			return nil
+		}
+		leftObj.Value = string(leftChar / rightChar)
+	case token.REM:
+		leftObj.Value = string(leftChar % rightChar)
+	default:
+		return nil
+	}
 
 	return []object.Object{
 		leftObj,
@@ -189,6 +226,8 @@ func evaluateBasicLiteral(expr *ast.BasicLit) []object.Object {
 		return evaluateIntegerLiteral(expr)
 	case token.STRING:
 		return evaluateStringLiteral(expr)
+	case token.CHAR:
+		return evaluateCharacterLiteral(expr)
 	default:
 		return nil
 	}
@@ -210,6 +249,14 @@ func evaluateIntegerLiteral(expr *ast.BasicLit) []object.Object {
 func evaluateStringLiteral(expr *ast.BasicLit) []object.Object {
 	return []object.Object{
 		&object.StringLiteral{
+			Value: expr.Value,
+		},
+	}
+}
+
+func evaluateCharacterLiteral(expr *ast.BasicLit) []object.Object {
+	return []object.Object{
+		&object.CharacterLiteral{
 			Value: expr.Value,
 		},
 	}

@@ -8,6 +8,7 @@ const (
 	Unknown Kind = iota
 	Integer
 	String
+	Character
 )
 
 type Object interface {
@@ -36,5 +37,17 @@ func (l StringLiteral) Kind() Kind {
 }
 
 func (l StringLiteral) String() string {
+	return l.Value
+}
+
+type CharacterLiteral struct {
+	Value string
+}
+
+func (l CharacterLiteral) Kind() Kind {
+	return Character
+}
+
+func (l CharacterLiteral) String() string {
 	return l.Value
 }

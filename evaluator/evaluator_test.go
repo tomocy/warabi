@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -66,6 +67,34 @@ func TestEvaluate(t *testing.T) {
 			[]object.Object{
 				&object.StringLiteral{
 					Value: `"hello, world"`,
+				},
+			},
+		},
+		{
+			`var a = 'a'`,
+			[]object.Object{
+				&object.CharacterLiteral{
+					Value: `'a'`,
+				},
+			},
+		},
+		{
+			`var a, b, c, d, e = 'a' + 'a', 'b' - 'b', 'c' * 'c', 'd' / 'd', 'e' % 'e'`,
+			[]object.Object{
+				&object.CharacterLiteral{
+					Value: fmt.Sprint(string('a' + 'a')),
+				},
+				&object.CharacterLiteral{
+					Value: fmt.Sprint(string('b' - 'b')),
+				},
+				&object.CharacterLiteral{
+					Value: fmt.Sprint(string('c' * 'c')),
+				},
+				&object.CharacterLiteral{
+					Value: fmt.Sprint(string('d' / 'd')),
+				},
+				&object.CharacterLiteral{
+					Value: fmt.Sprint(string('e' % 'e')),
 				},
 			},
 		},
