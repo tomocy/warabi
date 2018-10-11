@@ -240,6 +240,8 @@ func evaluateBinaryExpressionOfCharacterLiteral(
 	switch operator {
 	case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
 		return evaluateArithmeticOperationOfCharacterLiteral(leftObj, operator, rightObj)
+	case token.LSS, token.GTR, token.LEQ, token.GEQ:
+		return evaluateRelationalOperationOfCharacterLiteral(leftObj, operator, rightObj)
 	default:
 		return nil
 	}
@@ -269,6 +271,28 @@ func evaluateArithmeticOperationOfCharacterLiteral(
 	}
 
 	return leftObj
+}
+
+func evaluateRelationalOperationOfCharacterLiteral(
+	leftObj *object.CharacterLiteral,
+	operator token.Token,
+	rightObj *object.CharacterLiteral,
+) object.Object {
+	var value bool
+	switch operator {
+	case token.LSS:
+		value = leftObj.Value < rightObj.Value
+	case token.GTR:
+		value = leftObj.Value > rightObj.Value
+	case token.LEQ:
+		value = leftObj.Value <= rightObj.Value
+	case token.GEQ:
+		value = leftObj.Value >= rightObj.Value
+	default:
+		return nil
+	}
+
+	return convertToBooleanLiteral(value)
 }
 
 func evaluateBinaryExpressionOfFloatingPointLiteral(

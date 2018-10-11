@@ -127,6 +127,23 @@ func TestEvaluate(t *testing.T) {
 			},
 		},
 		{
+			`var a, b, c, d = 'a' < 'a', 'a' < 'b', 'a' <= 'a', 'a' >= 'z'`,
+			[]object.Object{
+				&object.BooleanLiteral{
+					Value: false,
+				},
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: true,
+				},
+				&object.BooleanLiteral{
+					Value: false,
+				},
+			},
+		},
+		{
 			`var a, b, c, d = 5.5 + 2, 4 - 2.0, 6 * 0.0, 3 / 2.0`,
 			[]object.Object{
 				&object.FloatingPointLiteral{
