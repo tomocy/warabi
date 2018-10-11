@@ -14,6 +14,14 @@ func TestEvaluate(t *testing.T) {
 		wants  []object.Object
 	}{
 		{
+			"var a int",
+			[]object.Object{
+				&object.IntegerLiteral{
+					Value: 0,
+				},
+			},
+		},
+		{
 			"var a int = 10",
 			[]object.Object{
 				&object.IntegerLiteral{

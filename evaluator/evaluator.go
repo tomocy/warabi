@@ -61,6 +61,9 @@ func evaluateSpecification(spec ast.Spec) []object.Object {
 
 func evaluateValueSpecification(spec *ast.ValueSpec) []object.Object {
 	var objs []object.Object
+	if len(spec.Values) == 0 {
+		spec = restoreZeroValues(*spec)
+	}
 	for i := 0; i < len(spec.Names); i++ {
 		obj := evaluateExpression(spec.Values[i])
 		env.set(spec.Names[i].Name, obj)
@@ -68,6 +71,48 @@ func evaluateValueSpecification(spec *ast.ValueSpec) []object.Object {
 	}
 
 	return objs
+}
+
+var zeroValues = map[string]ast.Expr{
+	"int": &ast.BasicLit{
+		Kind:  token.INT,
+		Value: "0",
+	},
+	"string": &ast.BasicLit{
+		Kind:  token.STRING,
+		Value: `""`,
+	},
+	"byte": &ast.BasicLit{
+		Kind:  token.CHAR,
+		Value: "'0'",
+	},
+	"rune": &ast.BasicLit{
+		Kind:  token.CHAR,
+		Value: "'0'",
+	},
+	"float32": &ast.BasicLit{
+		Kind:  token.FLOAT,
+		Value: "0.0",
+	},
+}
+
+func restoreZeroValues(spec ast.ValueSpec) *ast.ValueSpec {
+	spec.Values = make([]ast.Expr, len(spec.Names))
+	ident, ok := spec.Type.(*ast.Ident)
+	if !ok {
+		return &spec
+	}
+
+	zeroValue, ok := zeroValues[ident.Name]
+	if !ok {
+		return &spec
+	}
+
+	for i := 0; i < len(spec.Names); i++ {
+		spec.Values[i] = zeroValue
+	}
+
+	return &spec
 }
 
 func evaluateExpression(expr ast.Expr) object.Object {
