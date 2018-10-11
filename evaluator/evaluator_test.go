@@ -61,6 +61,14 @@ func TestEvaluate(t *testing.T) {
 				},
 			},
 		},
+		{
+			`var a = "hello, " + "world"`,
+			[]object.Object{
+				&object.StringLiteral{
+					Value: `"hello, world"`,
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

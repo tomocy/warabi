@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"strconv"
+	"strings"
 
 	"github.com/tomocy/warabi/object"
 )
@@ -102,6 +103,8 @@ func evaluateBinaryExpression(expr *ast.BinaryExpr) []object.Object {
 	switch {
 	case leftObj.Kind() == object.Integer && rightObj.Kind() == object.Integer:
 		return evaluateBinaryExpressionOfIntegerLiteral(leftObj.(*object.IntegerLiteral), expr.Op, rightObj.(*object.IntegerLiteral))
+	case leftObj.Kind() == object.String && rightObj.Kind() == object.String:
+		return evaluateBinaryExpressionOfStringLiteral(leftObj.(*object.StringLiteral), expr.Op, rightObj.(*object.StringLiteral))
 	default:
 		return nil
 	}
@@ -134,6 +137,20 @@ func evaluateArithmeticOperation(leftObj *object.IntegerLiteral, operator token.
 	default:
 		return nil
 	}
+
+	return []object.Object{
+		leftObj,
+	}
+}
+
+func evaluateBinaryExpressionOfStringLiteral(leftObj *object.StringLiteral, operator token.Token, rightObj *object.StringLiteral) []object.Object {
+	if operator != token.ADD {
+		return nil
+	}
+
+	leftStr := strings.TrimRight(leftObj.Value, `"`)
+	rightStr := strings.TrimLeft(rightObj.Value, `"`)
+	leftObj.Value = leftStr + rightStr
 
 	return []object.Object{
 		leftObj,
