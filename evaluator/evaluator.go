@@ -360,6 +360,8 @@ func evaluateUnaryExpression(expr *ast.UnaryExpr) object.Object {
 	switch expr.Op {
 	case token.SUB:
 		return evaluateMinusOperation(expr)
+	case token.NOT:
+		return evaluateNotOperation(expr)
 	default:
 		return nil
 	}
@@ -367,13 +369,27 @@ func evaluateUnaryExpression(expr *ast.UnaryExpr) object.Object {
 
 func evaluateMinusOperation(expr *ast.UnaryExpr) object.Object {
 	obj := evaluateExpression(expr.X)
-	intObj, ok := obj.(*object.IntegerLiteral)
+	intLiteral, ok := obj.(*object.IntegerLiteral)
 	if !ok {
 		return nil
 	}
 
-	intObj.Value *= -1
-	return intObj
+	intLiteral.Value *= -1
+	return intLiteral
+}
+
+func evaluateNotOperation(expr *ast.UnaryExpr) object.Object {
+	obj := evaluateExpression(expr.X)
+	boolLiteral, ok := obj.(*object.BooleanLiteral)
+	if !ok {
+		return nil
+	}
+
+	if boolLiteral == object.True {
+		return object.False
+	}
+
+	return object.True
 }
 
 func evaluateIdentifier(expr *ast.Ident) object.Object {

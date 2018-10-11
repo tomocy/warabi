@@ -4,13 +4,14 @@ import "github.com/tomocy/warabi/object"
 
 var env = &environment{
 	objs: map[string]object.Object{
-		"true": &object.BooleanLiteral{
-			Value: true,
-		},
-		"false": &object.BooleanLiteral{
-			Value: false,
-		},
+		"true":  object.True,
+		"false": object.False,
 	},
+}
+
+var builtins = map[string]bool{
+	"true":  true,
+	"false": true,
 }
 
 type environment struct {
@@ -18,6 +19,9 @@ type environment struct {
 }
 
 func (e *environment) set(name string, obj object.Object) {
+	if builtins[name] {
+		return
+	}
 	e.objs[name] = obj
 }
 

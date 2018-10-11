@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"log"
 	"reflect"
 	"testing"
 
@@ -51,18 +52,10 @@ func TestEvaluate(t *testing.T) {
 		{
 			"var a, b, c, d = 5 < 10, 1 > 1, 0 <= 0, 98 >= 99",
 			[]object.Object{
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
+				object.True,
+				object.False,
+				object.True,
+				object.False,
 			},
 		},
 		{
@@ -84,18 +77,10 @@ func TestEvaluate(t *testing.T) {
 		{
 			`var a, b, c, d = "a" < "a", "a" < "b", "a" <= "a", "a" >= "z"`,
 			[]object.Object{
-				&object.BooleanLiteral{
-					Value: false,
-				},
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
+				object.False,
+				object.True,
+				object.True,
+				object.False,
 			},
 		},
 		{
@@ -129,18 +114,10 @@ func TestEvaluate(t *testing.T) {
 		{
 			`var a, b, c, d = 'a' < 'a', 'a' < 'b', 'a' <= 'a', 'a' >= 'z'`,
 			[]object.Object{
-				&object.BooleanLiteral{
-					Value: false,
-				},
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
+				object.False,
+				object.True,
+				object.True,
+				object.False,
 			},
 		},
 		{
@@ -163,29 +140,19 @@ func TestEvaluate(t *testing.T) {
 		{
 			"var a, b, c, d = 5.0 < 10, 1 > 1.1, 0.0 <= 0, 99.0 >= 99.1",
 			[]object.Object{
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
+				object.True,
+				object.False,
+				object.True,
+				object.False,
 			},
 		},
 		{
-			`var a, b = true, false`,
+			"var a, b, c, d = true, false, !false, !true",
 			[]object.Object{
-				&object.BooleanLiteral{
-					Value: true,
-				},
-				&object.BooleanLiteral{
-					Value: false,
-				},
+				object.True,
+				object.False,
+				object.True,
+				object.False,
 			},
 		},
 	}
@@ -198,6 +165,7 @@ func TestEvaluate(t *testing.T) {
 			}
 			for i := 0; i < len(test.wants); i++ {
 				if !reflect.DeepEqual(gots[i], test.wants[i]) {
+					log.Println(i)
 					t.Errorf("unexpected object: got %#v, expected %#v\n", gots[i], test.wants[i])
 				}
 			}

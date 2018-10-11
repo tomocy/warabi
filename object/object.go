@@ -66,8 +66,17 @@ func (l FloatingPointLiteral) String() string {
 	return fmt.Sprintf("%e", l.Value)
 }
 
+var (
+	True = &BooleanLiteral{
+		value: true,
+	}
+	False = &BooleanLiteral{
+		value: false,
+	}
+)
+
 type BooleanLiteral struct {
-	Value bool
+	value bool
 }
 
 func (l BooleanLiteral) Kind() Kind {
@@ -75,5 +84,5 @@ func (l BooleanLiteral) Kind() Kind {
 }
 
 func (l BooleanLiteral) String() string {
-	return fmt.Sprintf("%t", l.Value)
+	return fmt.Sprintf("%t", l.value)
 }
