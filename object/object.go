@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+	"go/ast"
 )
 
 type Kind int
@@ -88,4 +89,19 @@ func (l BooleanLiteral) Kind() Kind {
 
 func (l BooleanLiteral) String() string {
 	return fmt.Sprintf("%t", l.value)
+}
+
+type FunctionLiteral struct {
+	Params  []*ast.Field
+	Results []*ast.Field
+	Body    []ast.Stmt
+	Env     *Environment
+}
+
+func (l FunctionLiteral) Kind() Kind {
+	return Function
+}
+
+func (l FunctionLiteral) String() string {
+	return ""
 }

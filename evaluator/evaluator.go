@@ -34,11 +34,45 @@ func evaluateDeclarations(decls []ast.Decl) []object.Object {
 
 func evaluateDeclaration(decl ast.Decl) []object.Object {
 	switch decl := decl.(type) {
+	case *ast.FuncDecl:
+		return evaluateFunctionDeclaration(decl)
 	case *ast.GenDecl:
 		return evaluateGenericsDeclaration(decl)
 	default:
 		return nil
 	}
+}
+
+func evaluateFunctionDeclaration(decl *ast.FuncDecl) []object.Object {
+	env := setFunctionEnvironment(decl.Type)
+	return []object.Object{
+		&object.FunctionLiteral{
+			Params:  decl.Type.Params.List,
+			Results: decl.Type.Results.List,
+			Body:    decl.Body.List,
+			Env:     env,
+		},
+	}
+}
+
+func setFunctionEnvironment(t *ast.FuncType) *object.Environment {
+	env := object.NewEnvironment()
+	for _, param := range t.Params.List {
+		for _, name := range param.Names {
+			zeroValue := zeroValues[name.Name]
+			obj := evaluateExpression(zeroValue)
+			env.Set(name.Name, obj)
+		}
+	}
+	for _, res := range t.Results.List {
+		for _, name := range res.Names {
+			zeroValue := zeroValues[name.Name]
+			obj := evaluateExpression(zeroValue)
+			env.Set(name.Name, obj)
+		}
+	}
+
+	return env
 }
 
 func evaluateGenericsDeclaration(decl *ast.GenDecl) []object.Object {
